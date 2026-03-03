@@ -1,56 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Menu, X, Search, BookOpen, Film, Image as ImageIcon, 
   Library, ArrowRight, PlayCircle, Users, Megaphone, 
   Palette, Calendar, FileText, Quote, MoveRight, ChevronRight,
   History, Newspaper, MessageSquare, Download, Filter, Eye,
   Clock, MapPin, Tag, Share2, ExternalLink, Award, Sparkles,
-  Layers, HeartHandshake, Microscope
+  Layers, HeartHandshake, Microscope, ChevronLeft, Mail, Phone,
+  Instagram, Facebook, Twitter, Globe, DownloadCloud, Info,
+  Map, Lightbulb, UserCheck, Radio, Music, Heart, GraduationCap,
+  Theater, Building2, BookMarked, Landmark, ScrollText, PenTool,
+  ChevronDown
 } from 'lucide-react';
 
-// --- Navigation Data ---
+// --- Data Constants ---
+const HERO_SLIDES = [
+  {
+    id: 1,
+    title: "The ASR Legacy",
+    italic: "Resistance",
+    subtitle: "Digitalizing four decades of feminist research and political education in South Asia.",
+    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=2000",
+    tag: "EST. 1983 — LAHORE",
+    cta: "Explore Archive"
+  },
+  {
+    id: 2,
+    title: "Political Education",
+    italic: "Empowerment",
+    subtitle: "Documentation of the Institute of Women's Studies Lahore and its regional impact.",
+    image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=2000",
+    tag: "IWSL LEGACY",
+    cta: "View Programmes"
+  },
+  {
+    id: 3,
+    title: "Visualizing Struggle",
+    italic: "History",
+    subtitle: "A vast repository of posters, films, and theatre records from the frontlines of activism.",
+    image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2000",
+    tag: "CURATED COLLECTIONS",
+    cta: "Browse Media"
+  }
+];
+
+const PROGRAMMES_SUBMENU = [
+  "ACFOD Women’s Programme",
+  "WCW Programme",
+  "Women and Violence Programme",
+  "Peace Programme",
+  "Minorities Programme",
+  "Tenants, Workers, Fisher folk Programme",
+  "ASR’s Programme in AJK, Gilgit – Baltistan",
+  "Programme on Sexualities",
+  "Women, Peace and Conflict",
+  "Women and Representation",
+  "Summer School Programme for Children"
+];
+
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', icon: null },
-  { id: 'programmes', label: 'Programmes', icon: <Users size={18} /> },
-  { id: 'network', label: 'Network & Linkages', icon: <Globe size={18} /> },
+  { id: 'herstory', label: 'Herstory', icon: <History size={18} /> },
+  { 
+    id: 'programmes', 
+    label: 'Programmes', 
+    icon: <Users size={18} />,
+    hasDropdown: true,
+    subMenu: PROGRAMMES_SUBMENU
+  },
+  { id: 'iwsl', label: 'IWSL', icon: <GraduationCap size={18} /> },
+  { id: 'network', label: 'Network and Linkages', icon: <Globe size={18} /> },
   { id: 'advocacy', label: 'Advocacy & Activism', icon: <Megaphone size={18} /> },
-  { id: 'research', label: 'Research', icon: <FileText size={18} /> },
   { id: 'publications', label: 'Publications', icon: <BookOpen size={18} /> },
-  { id: 'film-unit', label: 'Film Unit', icon: <Film size={18} /> },
   { id: 'theatre', label: 'Theatre & Creativity', icon: <Palette size={18} /> },
-  { id: 'cultural-events', label: 'Cultural Events', icon: <Calendar size={18} /> },
   { id: 'library', label: 'Library & Archives', icon: <Library size={18} /> },
 ];
 
-function Globe(props) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
-    </svg>
-  );
-}
-
-// --- Mock Data ---
-const PUBLICATIONS_DATA = [
-  { id: 1, title: "Locating the Self", author: "Nighat Said Khan", year: "1994", category: "Theory", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400" },
-  { id: 2, title: "Unveiling the Issues", author: "Edited by ASR", year: "1995", category: "Anthology", image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400" },
-  { id: 3, title: "Feminist Narratives", author: "ASR Collection", year: "1988", category: "History", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400" },
+const ADVOCACY_MILESTONES = [
+  { year: "1983", event: "Women's Action Forum", desc: "Key role in the formation and growth of WAF in Lahore." },
+  { year: "1988", event: "South Asian Dialogue", desc: "Initiating regional cross-border feminist solidarities." },
+  { year: "1994", event: "Beijing Platform", desc: "Leading the Pakistani civil society delegation for the UN World Conference." },
+  { year: "2002", event: "Peasant Movements", desc: "Extending feminist research into agrarian rights and labor struggles." },
+  { year: "2015", event: "Legal Reform", desc: "Advocating for legislative protection against harassment at the workplace." }
 ];
 
-const FILM_DATA = [
-  { id: 1, title: "Zia and the Women", duration: "45 min", year: "1988", description: "A documentary on the legislative changes affecting women during the Zia regime.", thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=600" },
-  { id: 2, title: "Theatre for Change", duration: "30 min", year: "1992", description: "Documentation of street theatre performances across rural Punjab.", thumbnail: "https://images.unsplash.com/photo-1503095396549-807759c4bc0e?auto=format&fit=crop&q=80&w=600" },
+const ARCHIVAL_ITEMS = [
+  {
+    id: 1,
+    title: "WAF Charter 1981",
+    type: "Document",
+    category: "Politics",
+    image: "https://images.unsplash.com/photo-1585776245991-cf89dd7fc53a?auto=format&fit=crop&q=80&w=800",
+    year: "1981"
+  },
+  {
+    id: 2,
+    title: "Aurat Raj Poster",
+    type: "Visual",
+    category: "Art",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800",
+    year: "1990"
+  },
+  {
+    id: 3,
+    title: "Regional Dialogue",
+    type: "Audio",
+    category: "History",
+    image: "https://images.unsplash.com/photo-1478737270239-2fccd2cdee0b?auto=format&fit=crop&q=80&w=800",
+    year: "1988"
+  },
+  {
+    id: 4,
+    title: "Feminist Pedagogy",
+    type: "Publication",
+    category: "Education",
+    image: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?auto=format&fit=crop&q=80&w=800",
+    year: "1995"
+  }
 ];
 
 // --- Reusable UI Elements ---
-
 const Button = ({ children, onClick, variant = 'primary', className = '' }) => {
   const baseStyle = "inline-flex items-center justify-center px-8 py-4 text-sm font-bold transition-all duration-300 rounded-full whitespace-nowrap tracking-wide";
   const variants = {
     primary: "bg-purple-900 text-white hover:bg-purple-800 shadow-xl shadow-purple-900/20 active:scale-95",
     outline: "border border-purple-200 text-purple-900 hover:bg-purple-50 active:scale-95",
     ghost: "text-purple-700 hover:text-purple-900 hover:bg-purple-100 active:scale-95",
-    white: "bg-white text-purple-950 hover:bg-purple-50 shadow-lg"
+    white: "bg-white text-purple-950 hover:bg-purple-50 shadow-lg",
+    dark: "bg-stone-900 text-white hover:bg-black",
+    purple: "bg-purple-900 text-white hover:bg-purple-950 shadow-lg"
   };
   
   return (
@@ -68,58 +145,334 @@ const SectionHeader = ({ title, subtitle, light = false, centered = false }) => 
   </div>
 );
 
-// --- Home Page Components ---
+const SubpageHeader = ({ title, italic, tag, image }) => (
+  <div className="relative h-[45vh] min-h-[400px] w-full flex items-end pb-20 overflow-hidden bg-purple-950">
+    <div 
+      className="absolute inset-0 opacity-40 grayscale"
+      style={{ backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-purple-950 via-purple-950/40 to-transparent" />
+    <div className="container mx-auto px-6 relative z-10">
+      <span className="text-purple-400 tracking-[0.4em] uppercase text-[10px] font-black mb-4 block animate-in slide-in-from-left duration-700">{tag}</span>
+      <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight animate-in slide-in-from-bottom duration-1000">
+        {title} <span className="font-serif italic text-purple-300">{italic}</span>
+      </h1>
+      <div className="w-16 h-1 bg-purple-500 mt-8" />
+    </div>
+  </div>
+);
 
-const HomePage = ({ navigateTo }) => {
-  const handleImgError = (e) => {
-    e.target.src = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=1200";
-  };
+// --- Internal Page Components ---
 
-  return (
-    <div className="animate-in fade-in duration-700">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center bg-purple-50 overflow-hidden pt-28 pb-12">
-        <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full bg-purple-100/30 lg:clip-path-slant hidden sm:block"></div>
-        <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="max-w-2xl order-2 lg:order-1">
-            <div className="flex items-center space-x-2 mb-6">
-              <span className="w-8 h-[2px] bg-purple-600"></span>
-              <span className="text-purple-600 tracking-[0.3em] uppercase text-xs font-black">EST. 1983 — Lahore</span>
+const HerstoryPage = () => (
+  <div className="bg-white">
+    <SubpageHeader title="ASR" italic="Herstory" tag="Founded 1983" image="https://images.unsplash.com/photo-1544640808-32ca72ac7f37?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6">
+      <div className="max-w-4xl mx-auto space-y-12">
+        <p className="text-2xl font-light leading-relaxed text-stone-800">
+          Applied Social Research (ASR) was founded by Nighat Said Khan and a collective of activists in 1983, a time when political dissent was high-risk but essential.
+        </p>
+        <div className="grid md:grid-cols-2 gap-12 text-stone-600 leading-relaxed font-light">
+          <div className="space-y-6">
+            <h3 className="text-xs font-black text-purple-900 uppercase tracking-widest">Our Roots</h3>
+            <p>Born out of the need for an independent, non-hierarchical space for feminist thought, ASR became the nucleus for regional organizing. We didn't just document the movement; we were the movement's laboratory.</p>
+            <p>In the early 80s, amidst institutionalized patriarchy, ASR provided a sanctuary for political education, research, and grassroots mobilization.</p>
+          </div>
+          <div className="space-y-6">
+            <h3 className="text-xs font-black text-purple-900 uppercase tracking-widest">The Evolution</h3>
+            <p>From a small resource center in Lahore, we evolved into a regional powerhouse for feminist pedagogical transformation. Our journey is one of persistence—building counter-narratives and alternative structures of knowledge.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
+const ProgrammesPage = ({ currentSubPath }) => (
+  <div className="bg-stone-50">
+    <SubpageHeader 
+      title={currentSubPath || "Our"} 
+      italic={currentSubPath ? "" : "Programmes"} 
+      tag="Engagement & Impact" 
+      image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000" 
+    />
+    <section className="py-24 container mx-auto px-6">
+      {currentSubPath ? (
+        <div className="max-w-3xl mx-auto text-center">
+          <SectionHeader title={currentSubPath} subtitle="Detailed archival records and documentation for this specific programme are being digitized and will be available soon in our repository." centered />
+          <Button variant="outline" onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            { icon: <PenTool />, title: "Political Education", desc: "Training young activists in constitutional rights, gender theory, and community organizing." },
+            { icon: <Microscope />, title: "Feminist Research", desc: "Interdisciplinary studies on labor, class, and the history of women's movements in Pakistan." },
+            { icon: <Landmark />, title: "Institutional Building", desc: "Mentoring new autonomous organizations to build a resilient civil society network." },
+            { icon: <Theater />, title: "Creative Activism", desc: "Using arts and performance as a medium for communicating complex socio-political issues." },
+            { icon: <MessageSquare />, title: "Conflict Resolution", desc: "Regional dialogues focused on women's role in peace-building and trans-border solidarity." },
+            { icon: <ScrollText />, title: "Digital Archiving", desc: "Systematic preservation of historical records for future generations of scholars and activists." }
+          ].map((item, i) => (
+            <div key={i} className="bg-white p-10 rounded-[2.5rem] border border-stone-200 hover:border-purple-300 transition-all group shadow-sm hover:shadow-xl">
+              <div className="text-purple-700 mb-6 group-hover:scale-110 transition-transform">{item.icon}</div>
+              <h4 className="text-xl font-bold mb-4">{item.title}</h4>
+              <p className="text-stone-500 font-light text-sm leading-relaxed">{item.desc}</p>
             </div>
-            <h1 className="text-6xl md:text-8xl xl:text-9xl font-light text-stone-900 leading-[1] mb-8 tracking-tighter">
-              The <span className="font-serif italic text-purple-800">ASR</span> <br/>
-              Legacy.
-            </h1>
-            <p className="text-xl md:text-2xl text-stone-600 mb-10 leading-relaxed font-light">
-              Digitalizing four decades of resistance, feminist research, and political education across South Asia.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-5">
-              <Button onClick={() => navigateTo('library')}>
-                Explore The Archive <MoveRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button variant="outline" onClick={() => navigateTo('publications')}>
-                Browse Publications
-              </Button>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+);
+
+const IWSLPage = () => (
+  <div className="bg-white">
+    <SubpageHeader title="Institute of" italic="Women's Studies" tag="Lahore" image="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6">
+      <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <div>
+          <h2 className="text-4xl font-light mb-8">Redefining education through a <span className="font-serif italic text-purple-900">feminist lens</span>.</h2>
+          <div className="space-y-6 text-stone-600 font-light leading-relaxed">
+            <p>IWSL is the first dedicated institute for Women's Studies in Pakistan. We bridge the gap between academic theory and grassroots activism, creating a space where knowledge is a tool for liberation.</p>
+            <p>Our courses attract students from across South Asia, fostering a unique regional perspective on patriarchy, labor, and social justice.</p>
+            <div className="pt-8 flex gap-4">
+              <Button variant="purple">Certificate Courses</Button>
+              <Button variant="outline">Download Prospectus</Button>
             </div>
           </div>
-          <div className="relative order-1 lg:order-2">
-            <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl bg-purple-200 aspect-[4/5] lg:aspect-auto lg:h-[750px]">
-              <img 
-                src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=1200" 
-                alt="Archive collection" 
-                className="w-full h-full object-cover"
-                onError={handleImgError}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent"></div>
-              <div className="absolute bottom-10 left-10 right-10 text-white">
-                <p className="text-xs uppercase tracking-[0.4em] font-black mb-3 opacity-80">Featured Collection</p>
-                <h3 className="text-3xl md:text-4xl font-serif italic">Women's Struggle (1983-1999)</h3>
-                <p className="mt-4 text-purple-200/70 text-sm max-w-sm">Rare documentation of early WAF meetings and street protests in Lahore.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-square bg-purple-900 rounded-[2rem] flex flex-col items-center justify-center text-white p-6">
+            <span className="text-4xl font-serif italic mb-2">1500+</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-purple-300">Graduates</span>
+          </div>
+          <div className="aspect-square bg-stone-100 rounded-[2rem] flex flex-col items-center justify-center text-stone-900 p-6">
+            <span className="text-4xl font-serif italic mb-2">1998</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Year Est.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
+const NetworkPage = () => (
+  <div className="bg-stone-50">
+    <SubpageHeader title="Network &" italic="Linkages" tag="Regional Solidarity" image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6">
+      <SectionHeader title="A Front Without Borders" subtitle="Our strength lies in our regional and international linkages. ASR is part of a global movement for justice." />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {['Sangat (Regional)', 'WAF (Pakistan)', 'AWID', 'DAWN', 'UN Women', 'WOREC (Nepal)', 'Nari Pokkho', 'WERC (Sri Lanka)'].map((n, i) => (
+          <div key={i} className="bg-white p-10 rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-center font-bold text-stone-400 grayscale hover:grayscale-0 hover:text-purple-900 transition-all cursor-pointer">
+            {n}
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+);
+
+const AdvocacyActivismPage = () => (
+  <div className="bg-white">
+    <SubpageHeader title="Advocacy &" italic="Activism" tag="Resistance" image="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6 max-w-5xl">
+      <div className="space-y-24">
+        {ADVOCACY_MILESTONES.map((item, i) => (
+          <div key={i} className="flex flex-col md:flex-row gap-12 group">
+            <div className="md:w-1/4">
+              <span className="text-6xl font-serif italic text-purple-100 group-hover:text-purple-900 transition-colors">{item.year}</span>
+            </div>
+            <div className="md:w-3/4">
+              <h3 className="text-3xl font-light mb-4">{item.event}</h3>
+              <p className="text-stone-500 font-light text-lg leading-relaxed">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+);
+
+const PublicationsPage = () => (
+  <div className="bg-stone-50">
+    <SubpageHeader title="ASR" italic="Publications" tag="Feminist Press" image="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        {[
+          { title: "Women in Pakistan", year: "2015", cat: "Theory" },
+          { title: "Peasant Revolts", year: "2012", cat: "History" },
+          { title: "Labour Struggles", year: "2018", cat: "Research" },
+          { title: "Feminist Voices", year: "2005", cat: "Sociology" },
+          { title: "Posters of Dissent", year: "2021", cat: "Arts" },
+          { title: "WAF: A History", year: "2000", cat: "Archive" }
+        ].map((pub, i) => (
+          <div key={i} className="group cursor-pointer">
+            <div className="aspect-[3/4] bg-stone-200 mb-6 rounded-[2rem] overflow-hidden shadow-sm group-hover:shadow-xl transition-all relative">
+              <div className="absolute inset-0 flex items-center justify-center p-12 text-center opacity-40">
+                <BookMarked size={48} className="text-stone-400" />
+              </div>
+            </div>
+            <span className="text-purple-600 font-black text-[10px] uppercase tracking-widest">{pub.cat}</span>
+            <h4 className="text-xl font-bold mt-2 group-hover:text-purple-900 transition-colors">{pub.title}</h4>
+            <p className="text-stone-400 text-sm mt-1">{pub.year}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+);
+
+const TheatreCreativityPage = () => (
+  <div className="bg-white">
+    <SubpageHeader title="Theatre &" italic="Creativity" tag="Culture" image="https://images.unsplash.com/photo-1514525253361-bee8d4a97475?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6 text-center max-w-4xl">
+      <h2 className="text-4xl font-light mb-12">Art is not a mirror to reflect reality, but a <span className="font-serif italic text-purple-900">hammer with which to shape it</span>.</h2>
+      <p className="text-stone-600 font-light text-xl leading-relaxed mb-20">
+        ASR pioneered street theatre in Pakistan as a means of political communication. We use visual arts, music, and performance to simplify complex socio-legal concepts for community mobilization.
+      </p>
+      <div className="grid md:grid-cols-2 gap-8 text-left">
+        <div className="p-12 bg-purple-50 rounded-[3rem]">
+          <Theater className="text-purple-900 mb-6" />
+          <h4 className="text-2xl font-bold mb-4">Street Theatre</h4>
+          <p className="text-stone-500 font-light leading-relaxed">Collaborative performances in villages and factories focusing on labor rights and domestic violence.</p>
+        </div>
+        <div className="p-12 bg-stone-50 rounded-[3rem]">
+          <Palette className="text-stone-900 mb-6" />
+          <h4 className="text-2xl font-bold mb-4">Visual Archives</h4>
+          <p className="text-stone-500 font-light leading-relaxed">A collection of posters, screen-prints, and banners that documented four decades of protests.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
+const LibraryArchivePage = () => (
+  <div className="bg-stone-50">
+    <SubpageHeader title="Library &" italic="Archives" tag="The Living Record" image="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=2000" />
+    <section className="py-24 container mx-auto px-6">
+      <div className="flex flex-col lg:flex-row gap-20">
+        <div className="lg:w-1/3">
+          <div className="p-10 bg-purple-900 text-white rounded-[2.5rem] shadow-2xl mb-8">
+            <h4 className="text-2xl font-bold mb-4">Archive Search</h4>
+            <div className="relative mt-6">
+              <input type="text" placeholder="Search the collection..." className="w-full bg-purple-800 border-none rounded-full py-4 pl-12 pr-6 text-sm focus:ring-2 focus:ring-purple-400 outline-none" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400" size={18} />
+            </div>
+          </div>
+          <div className="bg-white p-10 rounded-[2.5rem] border border-stone-200">
+            <h5 className="font-bold mb-6">Catalogue Highlights</h5>
+            <ul className="space-y-4 text-stone-500 font-light text-sm">
+              <li className="flex justify-between border-b pb-4"><span>Rare Manuscripts</span> <span className="font-bold text-stone-900">420</span></li>
+              <li className="flex justify-between border-b pb-4"><span>WAF Minutes</span> <span className="font-bold text-stone-900">12k Pages</span></li>
+              <li className="flex justify-between pb-2"><span>Audio Tapes</span> <span className="font-bold text-stone-900">800+</span></li>
+            </ul>
+          </div>
+        </div>
+        <div className="lg:w-2/3">
+          <SectionHeader title="Digital Repository" subtitle="Access thousands of documents currently being restored and tagged for public research." />
+          <div className="grid md:grid-cols-2 gap-8">
+            {ARCHIVAL_ITEMS.map(item => (
+              <div key={item.id} className="group cursor-pointer bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-lg transition-all">
+                <img src={item.image} className="w-full h-48 object-cover grayscale group-hover:grayscale-0 transition-all" />
+                <div className="p-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-purple-600">{item.type}</span>
+                  <h4 className="text-lg font-bold mt-1">{item.title}</h4>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
+// --- Hero Slider & Homepage Components ---
+const HeroSlider = ({ navigateTo }) => {
+  const [current, setCurrent] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const nextSlide = useCallback(() => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrent((prev) => (prev === HERO_SLIDES.length - 1 ? 0 : prev + 1));
+    setTimeout(() => setIsAnimating(false), 800);
+  }, [isAnimating]);
+
+  const prevSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrent((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1));
+    setTimeout(() => setIsAnimating(false), 800);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 7000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
+  return (
+    <section className="relative h-[85vh] w-full overflow-hidden bg-stone-900">
+      {HERO_SLIDES.map((slide, index) => (
+        <div 
+          key={slide.id}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+            index === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
+          }`}
+        >
+          <div className="absolute inset-0 scale-105 transition-transform duration-[7000ms] ease-linear"
+               style={{ 
+                 transform: index === current ? 'scale(1.15)' : 'scale(1)',
+                 backgroundImage: `url(${slide.image})`,
+                 backgroundPosition: 'center',
+                 backgroundSize: 'cover'
+               }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-stone-950/90 via-stone-950/60 to-transparent"></div>
+          </div>
+
+          <div className="relative h-full container mx-auto px-6 flex items-center">
+            <div className={`max-w-3xl transition-all duration-700 delay-300 transform ${
+              index === current ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+            }`}>
+              <div className="flex items-center space-x-4 mb-8">
+                <span className="w-12 h-[2px] bg-purple-500"></span>
+                <span className="text-purple-400 tracking-[0.4em] uppercase text-xs font-black">{slide.tag}</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl xl:text-8xl font-light text-white leading-[1] mb-8 tracking-tighter">
+                {slide.title} <br/>
+                <span className="font-serif italic text-purple-400">{slide.italic}</span>
+              </h1>
+              <p className="text-lg md:text-xl text-stone-300 mb-12 leading-relaxed font-light max-w-xl">
+                {slide.subtitle}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-5">
+                <Button onClick={() => navigateTo('library')} variant="white" className="!rounded-none !px-12">
+                  {slide.cta} <MoveRight className="ml-3 w-5 h-5" />
+                </Button>
+                <Button variant="ghost" className="text-white hover:bg-white/10 !rounded-none" onClick={() => navigateTo('publications')}>
+                  Browse Collection
+                </Button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      ))}
+
+      <div className="absolute bottom-12 right-6 md:right-12 z-20 flex items-center space-x-4">
+        <button onClick={prevSlide} className="w-14 h-14 rounded-full border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-stone-900 transition-all duration-300">
+          <ChevronLeft size={24} />
+        </button>
+        <button onClick={nextSlide} className="w-14 h-14 rounded-full border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-stone-900 transition-all duration-300">
+          <ChevronRight size={24} />
+        </button>
+      </div>
+    </section>
+  );
+};
+
+const HomePage = ({ navigateTo }) => {
+  return (
+    <div className="animate-in fade-in duration-700">
+      <HeroSlider navigateTo={navigateTo} />
 
       {/* Mission & Stats */}
       <section className="py-32 bg-white">
@@ -165,724 +518,357 @@ const HomePage = ({ navigateTo }) => {
         </div>
       </section>
 
-      {/* Archival Highlights Grid */}
-      <section className="py-32 bg-stone-50">
+      {/* Advocacy Teaser */}
+      <section className="py-32 bg-purple-50 text-stone-900 overflow-hidden">
         <div className="container mx-auto px-6">
-          <SectionHeader 
-            title="Archival Highlights" 
-            subtitle="Curated windows into the most significant moments stored within our digital vaults."
-            centered
-          />
-          <div className="grid md:grid-cols-4 gap-4 md:h-[800px]">
-            <div className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-[2rem] cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-950/20 to-transparent p-10 flex flex-col justify-end">
-                <span className="text-[10px] uppercase font-black text-purple-400 tracking-[0.4em] mb-4">Posters & Visuals</span>
-                <h4 className="text-3xl text-white font-serif italic mb-2">Street Art of Resistance</h4>
-                <p className="text-purple-200/60 text-sm max-w-sm">Hand-painted protest posters from the 1980s anti-discrimination marches.</p>
-              </div>
-            </div>
-            <div className="md:col-span-2 relative group overflow-hidden rounded-[2rem] cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-purple-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center p-12 text-center text-white">
-                <div>
-                  <BookOpen className="mx-auto mb-4" />
-                  <h4 className="text-xl font-bold mb-2">Rare Manuscripts</h4>
-                  <p className="text-xs text-purple-200">Early drafts of feminist theory papers published by ASR.</p>
-                </div>
-              </div>
-            </div>
-            <div className="relative group overflow-hidden rounded-[2rem] cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&q=80&w=600" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-purple-900/40"></div>
-              <div className="absolute bottom-6 left-6 text-white">
-                <p className="text-[10px] font-bold tracking-widest uppercase">Theatre Records</p>
-              </div>
-            </div>
-            <div className="relative group overflow-hidden rounded-[2rem] cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&q=80&w=600" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-purple-900/40"></div>
-              <div className="absolute bottom-6 left-6 text-white">
-                <p className="text-[10px] font-bold tracking-widest uppercase">Field Recordings</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* The Institute (IWSL) Spotlight */}
-      <section className="py-32 bg-purple-950 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 skew-x-12"></div>
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <div className="flex items-center space-x-3 text-purple-400 mb-8">
-                <Award size={20} />
-                <span className="text-xs font-black uppercase tracking-[0.4em]">Educational Legacy</span>
-              </div>
-              <h2 className="text-5xl md:text-7xl font-light mb-8 leading-tight">Institute of Women's <span className="font-serif italic">Studies</span> Lahore.</h2>
-              <p className="text-purple-200/70 text-lg md:text-xl font-light leading-relaxed mb-12">
-                Founded in 1998, IWSL has been the cornerstone of feminist education in Pakistan, offering courses that merge theory with transformative social practice.
-              </p>
-              <div className="grid sm:grid-cols-2 gap-8 mb-12">
-                <div className="border-l-2 border-purple-500 pl-6">
-                  <h4 className="text-xl font-bold mb-2">Diplomas & Degrees</h4>
-                  <p className="text-sm text-purple-300/60">Comprehensive curricula covering political economy, sociology, and gender.</p>
-                </div>
-                <div className="border-l-2 border-purple-500 pl-6">
-                  <h4 className="text-xl font-bold mb-2">Resource Network</h4>
-                  <p className="text-sm text-purple-300/60">Connecting thousands of alumnae working in civil society across South Asia.</p>
-                </div>
-              </div>
-              <Button variant="white" onClick={() => navigateTo('programmes')}>Explore Courses</Button>
-            </div>
-            <div className="relative">
-              <div className="rounded-[3rem] overflow-hidden shadow-3xl bg-white/10 p-4 border border-white/10">
-                <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800" className="rounded-[2.5rem] w-full h-[500px] object-cover" />
-              </div>
-              <div className="absolute -bottom-10 -left-10 bg-white p-10 rounded-[2rem] shadow-2xl text-stone-900 hidden md:block">
-                <p className="text-4xl font-serif italic mb-1 text-purple-900">25+</p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Years of Education</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Advocacy Section */}
-      <section className="py-32 bg-white">
-        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-          <div className="relative">
-             <div className="rounded-[3rem] overflow-hidden shadow-2xl bg-stone-100">
-                <img 
-                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1000" 
-                  className="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700" 
-                  alt="Advocacy" 
-                  onError={handleImgError}
-                />
-              </div>
-              <div className="absolute -top-10 -right-10 bg-purple-50 p-8 rounded-[2rem] border border-purple-100 hidden lg:block">
-                <Megaphone size={40} className="text-purple-600 mb-4" />
-                <p className="text-xs font-bold text-stone-400">Voices of Freedom</p>
-              </div>
-          </div>
-          <div>
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <SectionHeader 
-              title="Advocacy & Activism" 
-              subtitle="The history of ASR is written on the streets. Explore the posters, flyers, and manifestos that powered movements."
+              title="Advocacy in Action" 
+              subtitle="Moving beyond the archive—taking research to the streets and into the halls of power."
             />
-            <div className="space-y-6 mb-12">
-              {[
-                { label: 'WAF Records', desc: 'Minutes and manifestos from 1983 onwards.' },
-                { label: 'Labor Archives', desc: 'Documentation of peasant and factory worker movements.' },
-                { label: 'Legal Review', desc: 'Constitutional advocacy and judicial challenges.' }
-              ].map((item, i) => (
-                <div key={i} className="flex space-x-6 items-start">
-                  <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600 shrink-0 font-bold">0{i+1}</div>
+            <Button variant="purple" onClick={() => navigateTo('advocacy')} className="mb-8">
+              View All Initiatives <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-20 items-center">
+            <div className="space-y-12">
+              {ADVOCACY_MILESTONES.slice(0, 3).map((item, idx) => (
+                <div key={idx} className="group flex gap-8 items-start border-l border-purple-200 pl-8 hover:border-purple-600 transition-colors cursor-default">
+                  <span className="text-2xl font-serif italic text-purple-600">{item.year}</span>
                   <div>
-                    <h4 className="text-xl font-bold text-stone-900 mb-1">{item.label}</h4>
-                    <p className="text-stone-500 text-sm leading-relaxed">{item.desc}</p>
+                    <h4 className="text-xl font-bold mb-2 tracking-tight">{item.event}</h4>
+                    <p className="text-stone-500 font-light leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <Button onClick={() => navigateTo('advocacy')} variant="primary">Access Archives</Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Regional Impact Map */}
-      <section className="py-32 bg-stone-900 text-white">
-        <div className="container mx-auto px-6 text-center">
-          <SectionHeader 
-            title="A South Asian Pulse" 
-            subtitle="ASR has always looked beyond borders, fostering a regional feminist identity through its networks and linkages."
-            light
-            centered
-          />
-          <div className="max-w-5xl mx-auto mb-20">
-            <div className="grid md:grid-cols-5 gap-4">
-               {['Pakistan', 'India', 'Bangladesh', 'Nepal', 'Sri Lanka'].map((country) => (
-                 <div key={country} className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-purple-900 transition-colors group cursor-default">
-                   <h4 className="text-xl font-serif italic mb-2 group-hover:scale-110 transition-transform">{country}</h4>
-                   <div className="w-8 h-[1px] bg-purple-500 mx-auto opacity-40"></div>
-                 </div>
-               ))}
+            <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl">
+              <img src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover" alt="Advocacy" />
             </div>
           </div>
-          <div className="inline-flex items-center space-x-12 text-stone-500">
-             <div className="text-center">
-               <p className="text-3xl text-white font-light">50+</p>
-               <p className="text-[10px] uppercase font-bold tracking-widest mt-1">Cross-Border Workshops</p>
-             </div>
-             <div className="w-px h-10 bg-white/10"></div>
-             <div className="text-center">
-               <p className="text-3xl text-white font-light">12</p>
-               <p className="text-[10px] uppercase font-bold tracking-widest mt-1">Regional Networks</p>
-             </div>
-          </div>
         </div>
       </section>
 
-      {/* Quote Banner */}
-      <section className="py-40 bg-purple-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
-          <Quote size={500} />
-        </div>
-        <div className="container mx-auto px-6 text-center max-w-5xl relative z-10">
-          <Quote className="mx-auto text-purple-400 w-16 h-16 mb-12" />
-          <h2 className="text-4xl md:text-6xl font-serif italic leading-[1.15] mb-12">
-            "History is not just about what happened, but about who was allowed to tell the story. We are reclaiming our own narrative."
-          </h2>
-          <div className="flex flex-col items-center">
-             <div className="w-16 h-[1px] bg-purple-400 mb-6"></div>
-             <p className="text-purple-300 font-black uppercase tracking-[0.4em] text-sm">— Nighat Said Khan</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Contribute / Newsletter */}
+      {/* Archival Highlights */}
       <section className="py-32 bg-white">
         <div className="container mx-auto px-6">
-          <div className="bg-purple-50 rounded-[3.5rem] p-12 md:p-24 flex flex-col lg:flex-row items-center gap-16 relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-24 h-24 bg-purple-100 rounded-br-full opacity-50"></div>
-             <div className="lg:w-1/2 relative z-10">
-               <h3 className="text-4xl md:text-5xl font-light text-stone-900 mb-6">Contribute to the <span className="font-serif italic text-purple-800">Archive</span>.</h3>
-               <p className="text-stone-500 text-lg leading-relaxed font-light mb-10">
-                 Do you have photographs, pamphlets, or memories from the South Asian feminist movement? Help us build a more complete history.
-               </p>
-               <div className="flex flex-wrap gap-4">
-                 <Button variant="primary">Donate Records</Button>
-                 <Button variant="outline">Volunteer</Button>
-               </div>
-             </div>
-             <div className="lg:w-1/2 w-full">
-               <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-purple-100">
-                 <h4 className="text-xl font-bold mb-6 text-stone-900">Stay Updated</h4>
-                 <p className="text-stone-400 text-sm mb-8">Receive monthly digests of newly digitized collections and research.</p>
-                 <div className="flex flex-col sm:flex-row gap-4">
-                   <input type="email" placeholder="Email address" className="flex-grow bg-stone-50 border border-stone-200 rounded-full px-6 py-4 text-sm focus:outline-none focus:border-purple-500" />
-                   <Button variant="primary" className="px-10">Join</Button>
-                 </div>
-               </div>
-             </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
-
-// --- Other Pages Controller ---
-
-const MasterContent = ({ currentPath, icon, title }) => {
-  const renderSpecificContent = () => {
-    switch (currentPath) {
-      case 'programmes': return <ProgrammesPage />;
-      case 'network': return <NetworkPage />;
-      case 'advocacy': return <AdvocacyPage />;
-      case 'research': return <ResearchPage />;
-      case 'publications': return <PublicationsPage />;
-      case 'film-unit': return <FilmUnitPage />;
-      case 'theatre': return <TheatrePage />;
-      case 'cultural-events': return <CulturalEventsPage />;
-      case 'library': return <LibraryPage />;
-      default: return (
-        <div className="p-12 md:p-24 border-2 border-dashed border-purple-100 rounded-3xl text-center bg-purple-50/30">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <Library className="w-10 h-10 text-purple-300" />
-          </div>
-          <h3 className="text-2xl font-medium text-purple-900 mb-4">Archive Under Review</h3>
-          <p className="text-stone-500 max-w-lg mx-auto leading-relaxed">
-            The {title} collection is currently undergoing high-resolution digitization. Please check back soon for our full digital repository access.
-          </p>
-        </div>
-      );
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-white py-32 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-10 mb-20 border-b border-stone-50 pb-20">
-          <div className="w-24 h-24 bg-purple-100 text-purple-800 rounded-[2rem] flex items-center justify-center shadow-inner shrink-0">
-            {icon || <Library size={40} />}
-          </div>
-          <div className="flex-grow">
-            <div className="flex items-center space-x-3 text-purple-500 mb-3">
-              <History size={16} />
-              <span className="text-[10px] uppercase font-black tracking-[0.4em]">Digital Repository</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-light text-stone-900 mb-4">{title}</h1>
-            <p className="text-stone-400 text-lg max-w-3xl leading-relaxed font-light">
-              Explore our historic archives, preserving feminist research, artistic expressions, and the documentation of social movements in Pakistan since 1983.
-            </p>
-          </div>
-        </div>
-        {renderSpecificContent()}
-      </div>
-    </div>
-  );
-};
-
-// --- Page Specific Views ---
-
-const ProgrammesPage = () => (
-  <div className="space-y-16">
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {[
-        { title: "Institute of Women's Studies Lahore (IWSL)", period: "Since 1998", desc: "A formal educational body providing certificate and diploma courses in feminist theory and practice." },
-        { title: "Political Education Series", period: "1984-Present", desc: "Training modules and workshops designed for grassroots organizers and political aspirants." },
-        { title: "Gender & Development Training", period: "1990-2010", desc: "A pioneering program that challenged NGO paradigms with radical feminist analysis." }
-      ].map((prog, i) => (
-        <div key={i} className="p-12 bg-purple-50 rounded-[2.5rem] hover:bg-purple-100 transition-colors border border-purple-100/50 group">
-          <Award className="text-purple-800 mb-8 transition-transform group-hover:scale-110" size={36} />
-          <h3 className="text-2xl font-bold mb-3 text-stone-900 leading-tight">{prog.title}</h3>
-          <p className="text-purple-600 text-[10px] font-black uppercase mb-6 tracking-widest">{prog.period}</p>
-          <p className="text-stone-600 leading-relaxed mb-10 font-light">{prog.desc}</p>
-          <Button variant="outline" className="px-6 py-2 text-xs">View Records</Button>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const NetworkPage = () => (
-  <div className="space-y-16">
-    <div className="bg-stone-900 rounded-[4rem] p-12 md:p-24 text-white relative overflow-hidden">
-      <div className="relative z-10 grid lg:grid-cols-2 gap-20 items-center">
-        <div>
-          <h3 className="text-5xl font-serif italic mb-8">Regional Solidarity</h3>
-          <p className="text-stone-400 text-lg leading-relaxed mb-12 font-light">
-            ASR has served as the secretariat for numerous South Asian networks, facilitating cross-border dialogues between India, Pakistan, Bangladesh, Sri Lanka, and Nepal.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold tracking-widest uppercase">SANGAT Member</div>
-            <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold tracking-widest uppercase">South Asian Feminist Network</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="aspect-square rounded-[2rem] bg-purple-800/10 border border-white/5 flex flex-col items-center justify-center p-8 text-center hover:bg-purple-800/20 transition-colors">
-            <div className="text-3xl font-serif italic text-purple-400 mb-2">50+</div>
-            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Regional Workshops</p>
-          </div>
-          <div className="aspect-square rounded-[2rem] bg-purple-800/10 border border-white/5 flex flex-col items-center justify-center p-8 text-center hover:bg-purple-800/20 transition-colors">
-             <div className="text-3xl font-serif italic text-purple-400 mb-2">12</div>
-            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">International Summits</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const AdvocacyPage = () => (
-  <div className="space-y-12">
-    <div className="grid md:grid-cols-2 gap-12">
-      <div className="bg-stone-50 p-12 rounded-[2.5rem] border border-stone-100">
-        <h3 className="text-2xl font-bold mb-6 text-stone-900">Women's Action Forum (WAF)</h3>
-        <p className="text-stone-500 mb-10 leading-relaxed font-light">
-          The WAF collection includes minutes of meetings, press releases, and protest flyers from the 1980s movement against discriminatory laws.
-        </p>
-        <Button variant="primary">Access Digital WAF Folders</Button>
-      </div>
-      <div className="bg-stone-50 p-12 rounded-[2.5rem] border border-stone-100">
-        <h3 className="text-2xl font-bold mb-6 text-stone-900">Law & Constitutional Rights</h3>
-        <p className="text-stone-500 mb-10 leading-relaxed font-light">
-          Legal aid documentation and advocacy papers submitted for judicial review regarding the Hadood Ordinance.
-        </p>
-        <Button variant="outline">View Advocacy Papers</Button>
-      </div>
-    </div>
-  </div>
-);
-
-const TheatrePage = () => (
-  <div className="space-y-16">
-    <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-      {[
-        { title: "Dukhini", year: "1987", img: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&q=80&w=600", desc: "A stage play exploring rural women's labor." },
-        { title: "The Street Theatre Toolkit", year: "1992", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=600", desc: "A guide for activists using performance." },
-        { title: "Regional Creative Fest", year: "1995", img: "https://images.unsplash.com/photo-1460518451285-cd7ba71ba4c8?auto=format&fit=crop&q=80&w=600", desc: "Folk music and poetry from the Punjab region." }
-      ].map((item, i) => (
-        <div key={i} className="break-inside-avoid bg-white border border-stone-100 rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
-          <div className="overflow-hidden">
-            <img src={item.img} className="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
-          </div>
-          <div className="p-10">
-            <h4 className="text-2xl font-bold mb-2">{item.title}</h4>
-            <span className="text-purple-600 text-[10px] font-black tracking-[0.4em] uppercase">{item.year}</span>
-            <p className="text-stone-500 text-sm mt-6 font-light leading-relaxed">{item.desc}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const LibraryPage = () => (
-  <div className="space-y-16">
-    <div className="grid md:grid-cols-3 gap-8">
-      {[
-        { label: "Audio Archives", count: "450 Cassettes", icon: <PlayCircle /> },
-        { label: "Poster Collection", count: "1,200 Prints", icon: <ImageIcon /> },
-        { label: "Manuscript Room", count: "8,000+ Pages", icon: <FileText /> }
-      ].map((cat, i) => (
-        <div key={i} className="p-12 bg-white border border-stone-100 rounded-[2.5rem] text-center hover:shadow-2xl transition-all hover:-translate-y-2 group">
-          <div className="w-20 h-20 bg-purple-50 text-purple-800 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:bg-purple-900 group-hover:text-white transition-colors">
-            {React.cloneElement(cat.icon, { size: 36 })}
-          </div>
-          <h4 className="text-2xl font-bold text-stone-900 mb-2">{cat.label}</h4>
-          <p className="text-purple-600 text-[10px] uppercase tracking-[0.4em] font-black">{cat.count}</p>
-        </div>
-      ))}
-    </div>
-    
-    <div className="bg-purple-900 p-12 md:p-24 rounded-[4rem] text-white flex flex-col lg:flex-row justify-between items-center gap-12">
-      <div className="max-w-2xl">
-        <h3 className="text-4xl md:text-5xl font-serif italic mb-6">Visit the Physical Library</h3>
-        <p className="text-purple-200/70 text-lg leading-relaxed font-light">
-          The ASR Library in Lahore remains a sanctuary for researchers. If you are a student or scholar, you can request physical access to our un-digitized collections.
-        </p>
-      </div>
-      <Button variant="white">Book Appointment</Button>
-    </div>
-  </div>
-);
-
-const PublicationsPage = () => (
-  <div className="py-12 md:py-20">
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
-      <div className="flex-grow">
-        <div className="flex items-center space-x-3 text-purple-600 mb-3">
-          <Tag size={16} />
-          <span className="text-[10px] uppercase font-black tracking-[0.4em]">Digital Bookstore & Library</span>
-        </div>
-        <h2 className="text-5xl font-light text-stone-900">ASR Publications</h2>
-      </div>
-      <div className="flex space-x-3">
-        <Button variant="outline" className="px-6 py-3 text-xs font-bold"><Filter size={14} className="mr-2"/> Filter</Button>
-        <Button variant="outline" className="px-6 py-3 text-xs font-bold"><Search size={14} className="mr-2"/> Search</Button>
-      </div>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-      {PUBLICATIONS_DATA.map(pub => (
-        <div key={pub.id} className="group cursor-pointer">
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-6 bg-stone-100 shadow-sm transition-all duration-500 group-hover:shadow-3xl group-hover:-translate-y-2">
-            <img src={pub.image} alt={pub.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-          </div>
-          <p className="text-[10px] text-purple-600 font-black uppercase mb-2 tracking-widest">{pub.category} • {pub.year}</p>
-          <h3 className="text-xl font-bold text-stone-900 leading-tight mb-2 group-hover:text-purple-800 transition-colors">{pub.title}</h3>
-          <p className="text-stone-500 font-light">{pub.author}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const FilmUnitPage = () => (
-  <div className="py-12 md:py-20">
-    <div className="grid lg:grid-cols-2 gap-12">
-      {FILM_DATA.map(film => (
-        <div key={film.id} className="bg-stone-50 rounded-[2.5rem] overflow-hidden border border-stone-100 flex flex-col md:flex-row h-full group">
-          <div className="md:w-1/2 relative">
-            <img src={film.thumbnail} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-            <div className="absolute inset-0 bg-purple-950/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-purple-900 shadow-3xl transform group-hover:scale-110 transition-transform">
-                <PlayCircle size={40} />
-              </div>
-            </div>
-          </div>
-          <div className="md:w-1/2 p-10 flex flex-col">
-            <div className="flex items-center space-x-4 mb-6">
-              <span className="bg-purple-100 text-purple-700 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest">{film.duration}</span>
-              <span className="text-stone-400 text-xs font-bold">{film.year}</span>
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-stone-900 leading-tight">{film.title}</h3>
-            <p className="text-stone-500 text-sm leading-relaxed mb-10 flex-grow font-light">
-              {film.description}
-            </p>
-            <Button variant="ghost" className="justify-start p-0 group-item">
-              Watch Film <ArrowRight size={18} className="ml-2 transition-transform group-item-hover:translate-x-2" />
-            </Button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const ResearchPage = () => (
-  <div className="py-12">
-    <div className="bg-purple-50 rounded-[3rem] p-12 md:p-20 mb-20 border border-purple-100">
-      <h3 className="text-3xl font-bold text-purple-900 mb-10">Current Research Themes</h3>
-      <div className="grid md:grid-cols-3 gap-10">
-        {['Institutional Memory', 'Labor History', 'Identity & Self'].map((theme, i) => (
-          <div key={i} className="bg-white p-10 rounded-[2rem] shadow-sm border border-purple-50 hover:shadow-xl transition-all hover:-translate-y-1">
-            <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center mb-6 font-bold">
-              0{i + 1}
-            </div>
-            <h4 className="text-xl font-bold text-stone-800 mb-4">{theme}</h4>
-            <p className="text-sm text-stone-500 font-light leading-relaxed">Exploring the nuances of {theme.toLowerCase()} in the South Asian context.</p>
-          </div>
-        ))}
-      </div>
-    </div>
-    
-    <div className="space-y-6">
-      <h3 className="text-2xl font-bold text-stone-900 mb-10 px-4">Recent Digital Papers</h3>
-      {[
-        { title: "Reflections on the Women's Movement in Pakistan", type: "Working Paper", size: "2.4 MB" },
-        { title: "The Impact of Globalization on Rural Craftswomen", type: "Case Study", size: "4.1 MB" },
-        { title: "Education and Radicalization: A Feminist Critique", type: "Symposium Paper", size: "1.8 MB" },
-      ].map((paper, i) => (
-        <div key={i} className="group flex items-center justify-between p-10 bg-white border border-stone-100 rounded-[2rem] hover:border-purple-200 hover:shadow-xl transition-all">
-          <div className="flex items-center space-x-8">
-            <div className="hidden sm:flex w-16 h-16 bg-stone-50 text-stone-400 group-hover:bg-purple-100 group-hover:text-purple-600 rounded-2xl items-center justify-center transition-colors">
-              <FileText size={24} />
-            </div>
-            <div>
-              <h4 className="text-xl font-bold text-stone-800 group-hover:text-purple-900 transition-colors">{paper.title}</h4>
-              <p className="text-[10px] text-stone-400 uppercase font-black tracking-[0.4em] mt-2">{paper.type} • PDF</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-6">
-            <span className="hidden sm:block text-xs font-mono text-stone-300">{paper.size}</span>
-            <button className="p-4 text-stone-400 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-all">
-              <Download size={24} />
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const CulturalEventsPage = () => (
-  <div className="py-12">
-    <div className="space-y-32">
-      {[
-        { date: "Oct 1994", title: "Regional Workshop on Feminism", location: "Lahore", desc: "A landmark gathering of over 200 activists from across South Asia defining a regional agenda." },
-        { date: "Mar 1988", title: "Peasant Women's Conference", location: "Multan", desc: "The first large-scale mobilization of rural women workers for land rights documentation." },
-        { date: "Dec 2001", title: "Peace March Documentation", location: "Wagah Border", desc: "Records of the peace initiatives during the regional military standoff between nuclear neighbors." }
-      ].map((event, i) => (
-        <div key={i} className="flex flex-col md:flex-row gap-12 items-start group">
-          <div className="md:w-48 pt-4">
-            <span className="text-4xl font-serif italic text-purple-900 block mb-2">{event.date}</span>
-            <div className="w-10 h-1 bg-purple-100"></div>
-          </div>
-          <div className="flex-grow bg-stone-50 p-12 md:p-16 rounded-[3rem] group-hover:bg-purple-50 transition-all duration-500 border border-stone-100 group-hover:border-purple-100">
-            <div className="flex items-center space-x-3 text-stone-400 text-xs mb-6 font-bold uppercase tracking-widest">
-              <MapPin size={14} />
-              <span>{event.location}</span>
-            </div>
-            <h3 className="text-4xl font-light text-stone-900 mb-6 leading-tight group-hover:text-purple-900 transition-colors">{event.title}</h3>
-            <p className="text-stone-500 text-lg leading-relaxed max-w-3xl font-light">{event.desc}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// --- Master Layout App ---
-
-export default function App() {
-  const [currentPath, setCurrentPath] = useState('home');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isMobileMenuOpen]);
-
-  const navigateTo = (path) => {
-    setCurrentPath(path);
-    setIsMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const renderView = () => {
-    if (currentPath === 'home') return <HomePage navigateTo={navigateTo} />;
-    const currentNavItem = NAV_ITEMS.find(item => item.id === currentPath);
-    return (
-      <MasterContent 
-        currentPath={currentPath} 
-        title={currentNavItem?.label || 'Page Not Found'} 
-        icon={currentNavItem?.icon} 
-      />
-    );
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900 bg-white selection:bg-purple-200 overflow-x-hidden">
-      
-      {/* Navigation */}
-      <header 
-        className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
-          isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-8 md:py-12'
-        }`}
-      >
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          <div 
-            className="flex flex-col cursor-pointer z-[110] relative group" 
-            onClick={() => navigateTo('home')}
-          >
-            <span className="text-4xl font-bold tracking-tighter text-purple-950 leading-none group-hover:scale-105 transition-transform">ASR</span>
-            <span className={`text-[9px] tracking-[0.4em] uppercase font-black mt-2 transition-colors ${isScrolled ? 'text-purple-400' : 'text-purple-800'}`}>
-              Resource Centre
-            </span>
-          </div>
-
-          <nav className="hidden xl:flex items-center space-x-2">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => navigateTo(item.id)}
-                className={`px-4 py-2.5 text-[11px] font-black tracking-widest uppercase transition-all rounded-full whitespace-nowrap ${
-                  currentPath === item.id 
-                    ? 'text-purple-900 bg-purple-100' 
-                    : 'text-stone-500 hover:text-purple-700 hover:bg-purple-50'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-            <button className="ml-6 p-3 text-purple-950 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors border border-purple-100 shadow-sm">
-              <Search size={20} />
-            </button>
-          </nav>
-
-          <div className="xl:hidden flex items-center z-[110] space-x-4">
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-3 text-purple-950 bg-white shadow-xl border border-stone-100 rounded-full active:scale-95 transition-all"
-            >
-              <Menu size={28} />
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        <div 
-          className={`fixed inset-0 bg-purple-950/60 backdrop-blur-xl z-[115] transition-opacity duration-700 xl:hidden ${
-            isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-
-        <div className={`
-          fixed top-0 right-0 h-screen w-full sm:w-[500px] bg-white z-[120] xl:hidden shadow-3xl transition-transform duration-700 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col
-          ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}>
-          <div className="p-10 flex justify-between items-center border-b border-stone-50">
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold tracking-tighter text-purple-950 leading-none">ASR</span>
-              <span className="text-[10px] tracking-[0.3em] uppercase font-black text-purple-400 mt-2">Archive Menu</span>
-            </div>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-4 text-stone-400 hover:text-purple-900 bg-stone-50 rounded-full transition-all">
-              <X size={32} />
-            </button>
-          </div>
-
-          <div className="flex-grow overflow-y-auto py-10 px-6 scrollbar-hide">
-            <div className="flex flex-col space-y-2">
-              {NAV_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => navigateTo(item.id)}
-                  className={`flex items-center justify-between text-left p-6 rounded-3xl transition-all group ${
-                    currentPath === item.id 
-                      ? 'text-purple-950 bg-purple-50 font-bold' 
-                      : 'text-stone-600 hover:bg-stone-50'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <span className={`mr-6 transition-colors ${currentPath === item.id ? 'text-purple-700' : 'text-stone-300'}`}>
-                      {item.icon || <Globe size={24} />}
-                    </span>
-                    <span className="text-2xl font-light tracking-tight">{item.label}</span>
-                  </div>
-                  <ChevronRight size={20} className={`transition-transform duration-500 group-hover:translate-x-2 ${currentPath === item.id ? 'text-purple-600 opacity-100' : 'opacity-10'}`} />
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <SectionHeader 
+              title="Archival Highlights" 
+              subtitle="A window into the rare collections currently being digitized from our vault."
+            />
+            <div className="flex gap-4 mb-8 overflow-x-auto pb-4 w-full md:w-auto">
+              {['All', 'Document', 'Visual', 'Audio'].map(cat => (
+                <button key={cat} className="px-6 py-2 rounded-full border border-stone-100 text-xs font-black uppercase tracking-widest hover:bg-purple-900 hover:text-white transition-all whitespace-nowrap">
+                  {cat}
                 </button>
               ))}
             </div>
           </div>
-          
-          <div className="p-10 bg-purple-50 flex flex-col space-y-8">
-             <div className="flex justify-between items-center">
-                <div className="text-[10px] uppercase tracking-[0.4em] font-black text-purple-400">South Asia Archive</div>
-                <div className="flex space-x-4">
-                  {['TW', 'IG', 'FB'].map(s => (
-                    <div key={s} className="w-10 h-10 rounded-full bg-white border border-purple-100 flex items-center justify-center text-[10px] font-black text-purple-900 shadow-sm">
-                      {s}
-                    </div>
-                  ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {ARCHIVAL_ITEMS.map(item => (
+              <div key={item.id} className="group cursor-pointer">
+                <div className="relative aspect-[3/4] rounded-3xl overflow-hidden mb-6 bg-stone-100">
+                  <img src={item.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt={item.title} />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-purple-900">
+                    {item.year}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
+                    <Button variant="white" className="!py-2 !px-4 !text-[10px] w-full">View Item</Button>
+                  </div>
                 </div>
-             </div>
-             <p className="text-xs leading-relaxed text-stone-400 italic font-light">
-               Lahore, Pakistan. Founded 1983. <br/>
-               Digitalizing the history of resistance.
-             </p>
+                <span className="text-purple-600 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">{item.type}</span>
+                <h4 className="text-xl font-bold text-stone-900 group-hover:text-purple-800 transition-colors">{item.title}</h4>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Institute of Women's Studies Lahore Section - Dark Purple Background */}
+      <section id="iwsl-section" className="py-32 bg-purple-950 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 transform translate-x-1/2"></div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-24 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="inline-flex items-center space-x-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8">
+                <GraduationCap className="text-purple-300 w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-purple-100">The Academic Arm</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-light mb-10 leading-[1.1] tracking-tight text-white">
+                Institute of Women's <br/>
+                <span className="font-serif italic text-purple-300">Studies Lahore</span>
+              </h2>
+              <p className="text-purple-100/80 text-lg leading-relaxed mb-12 font-light max-w-xl">
+                Established as the first of its kind in Pakistan, IWSL provides a radical space for intellectual inquiry and feminist pedagogy. Our curriculum bridges the gap between grassroots activism and academic theory.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-8 mb-12">
+                <div className="p-8 bg-white/5 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors group">
+                  <h4 className="text-xl font-bold mb-3 group-hover:text-purple-300 transition-colors">Post-Graduate Diploma</h4>
+                  <p className="text-sm text-purple-200/60 font-light">Comprehensive 1-year immersion in gender studies and social theory.</p>
+                </div>
+                <div className="p-8 bg-white/5 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors group">
+                  <h4 className="text-xl font-bold mb-3 group-hover:text-purple-300 transition-colors">Short Courses</h4>
+                  <p className="text-sm text-purple-200/60 font-light">Modular sessions on labor rights, constitutional law, and media literacy.</p>
+                </div>
+              </div>
+              <Button variant="white" onClick={() => navigateTo('iwsl')}>Explore Curriculum</Button>
+            </div>
+            <div className="order-1 lg:order-2 relative">
+              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover grayscale" alt="IWSL Classroom" />
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-950 via-transparent to-transparent opacity-80"></div>
+              </div>
+              <div className="absolute -bottom-10 -left-10 p-12 bg-purple-800 rounded-[2rem] hidden md:block shadow-2xl">
+                 <div className="text-5xl font-serif italic text-white mb-2">1998</div>
+                 <p className="text-purple-100 text-xs font-black uppercase tracking-widest">Year Founded</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quote Section by Nighat Said Khan - Light Purple Background */}
+      <section className="py-40 bg-purple-50 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 text-[30rem] font-serif italic text-purple-100/40 select-none -z-0 leading-none pointer-events-none">“</div>
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <Quote className="w-16 h-16 text-purple-200 mx-auto mb-12" />
+            <h2 className="text-3xl md:text-5xl font-light text-purple-950 leading-[1.4] mb-16 tracking-tight">
+              "Feminism for us is not just a theory; it is a lived <span className="font-serif italic text-purple-800">political practice</span>. We must document our struggles, or they will be written out of history by those who seek to silence us."
+            </h2>
+            <div className="w-20 h-0.5 bg-purple-200 mx-auto mb-8"></div>
+            <div className="flex flex-col items-center">
+              <p className="text-xl font-bold text-purple-900 mb-2">Nighat Said Khan</p>
+              <p className="text-purple-400 text-xs uppercase font-black tracking-[0.3em]">Executive Director & Founder, ASR</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+// --- Master Page Controller ---
+const MasterContent = ({ currentPath, currentSubPath, navigateTo }) => {
+  switch (currentPath) {
+    case 'home': return <HomePage navigateTo={navigateTo} />;
+    case 'herstory': return <HerstoryPage />;
+    case 'programmes': return <ProgrammesPage currentSubPath={currentSubPath} />;
+    case 'iwsl': return <IWSLPage />;
+    case 'network': return <NetworkPage />;
+    case 'advocacy': return <AdvocacyActivismPage />;
+    case 'publications': return <PublicationsPage />;
+    case 'theatre': return <TheatreCreativityPage />;
+    case 'library': return <LibraryArchivePage />;
+    default: return <HomePage navigateTo={navigateTo} />;
+  }
+};
+
+// --- Nav Item with Dropdown Logic ---
+const NavDropdown = ({ item, currentPath, navigateTo }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  };
+
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        onClick={() => navigateTo(item.id)}
+        className={`px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all rounded-full flex items-center gap-2 ${
+          currentPath === item.id 
+            ? 'text-purple-900 bg-purple-50' 
+            : 'text-stone-500 hover:text-purple-700 hover:bg-stone-50'
+        }`}
+      >
+        {item.label}
+        {item.hasDropdown && <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />}
+      </button>
+
+      {item.hasDropdown && (
+        <div className={`absolute top-full left-0 pt-2 transition-all duration-300 ${
+          isOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 invisible'
+        }`}>
+          <div className="bg-white border border-stone-100 shadow-xl rounded-2xl py-3 min-w-[280px] overflow-hidden">
+            {item.subMenu.map((sub, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  navigateTo(item.id, sub);
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-stone-500 hover:text-purple-900 hover:bg-purple-50 transition-colors border-b last:border-none border-stone-50"
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- Main App ---
+export default function App() {
+  const [currentPath, setCurrentPath] = useState('home');
+  const [currentSubPath, setCurrentSubPath] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedMobileItem, setExpandedMobileItem] = useState(null);
+
+  const navigateTo = (path, subPath = null) => {
+    setCurrentPath(path);
+    setCurrentSubPath(subPath);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col font-sans text-stone-900 bg-white">
+      {/* MANDATORY STICKY HEADER */}
+      <header className="sticky top-0 w-full z-[100] bg-white border-b border-stone-100 py-4 shadow-md">
+        <div className="container mx-auto px-6 flex justify-between items-center">
+          <div className="flex flex-col cursor-pointer" onClick={() => navigateTo('home')}>
+            <span className="text-3xl font-bold tracking-tighter text-purple-950">ASR</span>
+            <span className="text-[9px] tracking-[0.4em] uppercase font-black text-purple-400">Resource Centre</span>
+          </div>
+
+          <nav className="hidden xl:flex items-center space-x-1">
+            {NAV_ITEMS.map((item) => (
+              <NavDropdown 
+                key={item.id} 
+                item={item} 
+                currentPath={currentPath} 
+                navigateTo={navigateTo} 
+              />
+            ))}
+          </nav>
+
+          <button className="xl:hidden p-2 text-purple-950" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu size={24} />
+          </button>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <div 
+          className={`fixed inset-0 z-[150] transition-all duration-500 ${
+            isMobileMenuOpen ? 'visible' : 'invisible'
+          }`}
+        >
+          <div 
+            className={`absolute inset-0 bg-stone-900/60 backdrop-blur-sm transition-opacity duration-500 ${
+              isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`} 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div 
+            className={`absolute top-0 right-0 h-full w-[85%] max-w-[360px] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col ${
+              isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="flex justify-between items-center px-8 py-6 border-b border-stone-100">
+              <span className="text-sm font-black text-purple-950 tracking-widest uppercase">Navigation</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-stone-50 rounded-full transition-colors">
+                <X size={20} className="text-stone-500" />
+              </button>
+            </div>
+            <div className="flex-grow overflow-y-auto px-4 py-8">
+              <div className="flex flex-col gap-1">
+                {NAV_ITEMS.map(item => (
+                  <div key={item.id} className="flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <button 
+                        onClick={() => navigateTo(item.id)} 
+                        className={`flex-grow flex items-center gap-4 px-4 py-4 rounded-xl text-left text-sm font-bold tracking-tight transition-all ${
+                          currentPath === item.id ? 'text-purple-900 bg-purple-50' : 'text-stone-500'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                      {item.hasDropdown && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedMobileItem(expandedMobileItem === item.id ? null : item.id);
+                          }}
+                          className="px-4 h-full text-stone-400"
+                        >
+                          <ChevronDown size={18} className={`transition-transform duration-300 ${expandedMobileItem === item.id ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+                    {item.hasDropdown && expandedMobileItem === item.id && (
+                      <div className="bg-stone-50 rounded-xl mb-2 mx-2">
+                        {item.subMenu.map((sub, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => navigateTo(item.id, sub)}
+                            className="w-full text-left px-10 py-3 text-[11px] font-bold text-stone-500 border-b border-stone-100 last:border-none"
+                          >
+                            {sub}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-grow">
-        {renderView()}
+      <main className="flex-grow relative z-0">
+        <MasterContent currentPath={currentPath} currentSubPath={currentSubPath} navigateTo={navigateTo} />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-purple-950 text-purple-200/60 py-24 md:py-32 border-t border-white/5 relative overflow-hidden">
-        <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600"></div>
+      <footer className="bg-purple-950 text-white pt-24 pb-12 relative z-10">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20 lg:gap-32">
-            <div className="lg:col-span-2">
-              <span className="text-5xl font-bold text-white tracking-tighter">ASR</span>
-              <p className="text-[11px] tracking-[0.5em] uppercase text-purple-400 font-black mt-4 mb-10">Digital History Project</p>
-              <p className="max-w-md leading-relaxed text-purple-100/70 text-lg font-light">
-                Preserving four decades of the ASR Resource Centre's contribution to feminist research and social justice movements in Pakistan and South Asia.
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            <div className="lg:col-span-1">
+              <span className="text-4xl font-bold tracking-tighter block mb-6">ASR</span>
+              <p className="text-purple-200/60 text-sm font-light leading-relaxed">
+                A pioneer in feminist research, political education, and social activism in South Asia since 1983.
               </p>
             </div>
-            
-            <div>
-              <h4 className="text-white text-[11px] font-black uppercase tracking-[0.4em] mb-10 border-b border-white/10 pb-6">Collections</h4>
-              <ul className="space-y-6 text-base font-light">
-                <li><button onClick={() => navigateTo('publications')} className="hover:text-white transition-colors">Publications</button></li>
-                <li><button onClick={() => navigateTo('film-unit')} className="hover:text-white transition-colors">Filmography</button></li>
-                <li><button onClick={() => navigateTo('theatre')} className="hover:text-white transition-colors">Creative Works</button></li>
-                <li><button onClick={() => navigateTo('library')} className="hover:text-white transition-colors">Main Archive</button></li>
-              </ul>
+            <div className="lg:col-span-2">
+              <h4 className="text-xs font-black uppercase tracking-widest text-purple-400 mb-8">Navigation</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm font-light text-purple-100/70">
+                {NAV_ITEMS.map(item => (
+                  <button key={item.id} onClick={() => navigateTo(item.id)} className="text-left hover:text-white transition-colors">
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            
             <div>
-              <h4 className="text-white text-[11px] font-black uppercase tracking-[0.4em] mb-10 border-b border-white/10 pb-6">Resources</h4>
-              <ul className="space-y-6 text-base font-light">
-                <li><button onClick={() => navigateTo('research')} className="hover:text-white transition-colors">Research Papers</button></li>
-                <li><button onClick={() => navigateTo('advocacy')} className="hover:text-white transition-colors">Activism Records</button></li>
-                <li><button onClick={() => navigateTo('network')} className="hover:text-white transition-colors">Regional Network</button></li>
-                <li><button onClick={() => navigateTo('programmes')} className="hover:text-white transition-colors">Educational Programs</button></li>
-              </ul>
+              <h4 className="text-xs font-black uppercase tracking-widest text-purple-400 mb-8">Contact & Social</h4>
+              <p className="text-sm font-light text-purple-100/70 mb-6">Gulberg III, Lahore, Pakistan<br/>asr@brain.net.pk</p>
+              <div className="flex space-x-6 text-purple-300">
+                <Instagram size={20} className="hover:text-white cursor-pointer" /> 
+                <Facebook size={20} className="hover:text-white cursor-pointer" /> 
+                <Twitter size={20} className="hover:text-white cursor-pointer" />
+              </div>
             </div>
           </div>
-          
-          <div className="border-t border-white/5 mt-24 md:mt-32 pt-12 flex flex-col md:flex-row justify-between items-center text-[11px] uppercase tracking-[0.3em] gap-10">
-            <p className="font-bold opacity-40">&copy; {new Date().getFullYear()} ASR Resource Centre Digital Archive.</p>
-            <div className="flex space-x-10">
-              <span className="text-purple-400">Lahore, Pakistan</span>
-              <span className="text-purple-400">Since 1983</span>
-            </div>
-          </div>
+          <p className="pt-12 border-t border-white/5 text-[10px] font-black uppercase tracking-widest text-purple-400/50 flex flex-col md:flex-row justify-between gap-4">
+            <span>&copy; {new Date().getFullYear()} ASR Resource Centre & IWSL Lahore.</span>
+            <span>Digital Archive for Social Change</span>
+          </p>
         </div>
       </footer>
     </div>
