@@ -9,7 +9,7 @@ import {
   Instagram, Facebook, Twitter, Globe, DownloadCloud, Info,
   Map, Lightbulb, UserCheck, Radio, Music, Heart, GraduationCap,
   Theater, Building2, BookMarked, Landmark, ScrollText, PenTool,
-  ChevronDown
+  ChevronDown, Zap
 } from 'lucide-react';
 
 // --- Data Constants ---
@@ -162,7 +162,23 @@ const SubpageHeader = ({ title, italic, tag, image }) => (
   </div>
 );
 
-// --- Internal Page Components ---
+// --- Master Page Controller ---
+const MasterContent = ({ currentPath, currentSubPath, navigateTo }) => {
+  switch (currentPath) {
+    case 'home': return <HomePage navigateTo={navigateTo} />;
+    case 'herstory': return <HerstoryPage />;
+    case 'programmes': return <ProgrammesPage currentSubPath={currentSubPath} />;
+    case 'iwsl': return <IWSLPage />;
+    case 'network': return <NetworkPage />;
+    case 'advocacy': return <AdvocacyActivismPage />;
+    case 'publications': return <PublicationsPage />;
+    case 'theatre': return <TheatreCreativityPage />;
+    case 'library': return <LibraryArchivePage />;
+    default: return <HomePage navigateTo={navigateTo} />;
+  }
+};
+
+// --- Page Components ---
 
 const HerstoryPage = () => (
   <div className="bg-white">
@@ -518,32 +534,85 @@ const HomePage = ({ navigateTo }) => {
         </div>
       </section>
 
-      {/* Advocacy Teaser */}
-      <section className="py-32 bg-purple-50 text-stone-900 overflow-hidden">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-            <SectionHeader 
-              title="Advocacy in Action" 
-              subtitle="Moving beyond the archive—taking research to the streets and into the halls of power."
-            />
-            <Button variant="purple" onClick={() => navigateTo('advocacy')} className="mb-8">
-              View All Initiatives <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+      {/* Modern Advocacy Section - Light Purple Background */}
+      <section className="py-32 bg-purple-50 text-stone-900 relative overflow-hidden">
+        {/* Subtle Decorative Background Elements */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-200/50 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-100/50 rounded-full blur-[120px]" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-0.5 bg-purple-600" />
+                <span className="text-purple-600 text-[10px] font-black uppercase tracking-[0.5em]">The Frontline</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-light leading-tight tracking-tighter">
+                Advocacy in <span className="font-serif italic text-purple-900">Action</span>
+              </h2>
+              <p className="mt-8 text-stone-500 text-lg md:text-xl font-light leading-relaxed max-w-xl">
+                Moving beyond the archive—taking decades of feminist research into the streets and the halls of power to demand systemic change.
+              </p>
+            </div>
+            <button 
+              onClick={() => navigateTo('advocacy')}
+              className="group flex items-center gap-4 bg-white hover:bg-purple-900 border border-purple-100 hover:border-purple-800 px-8 py-5 rounded-full transition-all duration-500 shadow-xl shadow-purple-900/5"
+            >
+              <span className="text-sm font-bold tracking-widest uppercase group-hover:text-white">Explore All Initiatives</span>
+              <div className="bg-purple-50 p-2 rounded-full group-hover:bg-white group-hover:text-purple-900 transition-colors">
+                <ArrowRight size={20} className="text-purple-900" />
+              </div>
+            </button>
           </div>
-          <div className="grid md:grid-cols-2 gap-20 items-center">
-            <div className="space-y-12">
-              {ADVOCACY_MILESTONES.slice(0, 3).map((item, idx) => (
-                <div key={idx} className="group flex gap-8 items-start border-l border-purple-200 pl-8 hover:border-purple-600 transition-colors cursor-default">
-                  <span className="text-2xl font-serif italic text-purple-600">{item.year}</span>
+
+          <div className="grid lg:grid-cols-12 gap-12">
+            {/* Main Interactive Visual / Featured Milestone */}
+            <div className="lg:col-span-7 relative group cursor-pointer">
+              <div className="aspect-[16/10] rounded-[2.5rem] overflow-hidden relative shadow-2xl ring-1 ring-purple-100 bg-purple-100">
+                <img 
+                  src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                  alt="Women Organising and Advocating" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent" />
+                
+                {/* Floating Meta Tag */}
+                <div className="absolute top-8 left-8 flex items-center gap-3 px-5 py-3 bg-white/90 backdrop-blur-xl rounded-full border border-purple-50 shadow-lg">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-900">Featured Campaign</span>
+                </div>
+
+                <div className="absolute bottom-10 left-10 right-10">
+                  <div className="text-4xl font-serif italic text-purple-300 mb-2">1994</div>
+                  <h3 className="text-3xl font-bold tracking-tight mb-4 text-white">Beijing Platform for Action</h3>
+                  <p className="text-purple-100 font-light max-w-md line-clamp-2">Leading the Pakistani civil society delegation to the United Nations World Conference on Women.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrolling Milestones List */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              {ADVOCACY_MILESTONES.slice(0, 4).map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className="flex items-start gap-8 p-8 bg-white hover:bg-purple-900 rounded-3xl border border-purple-100 hover:border-purple-800 transition-all duration-500 group shadow-sm hover:shadow-2xl"
+                >
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-900 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
+                      <Zap size={24} />
+                    </div>
+                  </div>
                   <div>
-                    <h4 className="text-xl font-bold mb-2 tracking-tight">{item.event}</h4>
-                    <p className="text-stone-500 font-light leading-relaxed">{item.desc}</p>
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-xs font-black uppercase tracking-widest text-purple-600 group-hover:text-purple-300 transition-colors">{item.year}</span>
+                      <div className="w-1 h-1 rounded-full bg-stone-200 group-hover:bg-purple-400" />
+                      <span className="text-xs font-bold text-stone-400 group-hover:text-purple-300 uppercase tracking-widest">Milestone</span>
+                    </div>
+                    <h4 className="text-xl font-bold mb-3 tracking-tight group-hover:text-white transition-colors">{item.event}</h4>
+                    <p className="text-stone-500 font-light text-sm leading-relaxed group-hover:text-purple-100/70 transition-colors">{item.desc}</p>
                   </div>
                 </div>
               ))}
-            </div>
-            <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover" alt="Advocacy" />
             </div>
           </div>
         </div>
@@ -647,22 +716,6 @@ const HomePage = ({ navigateTo }) => {
       </section>
     </div>
   );
-};
-
-// --- Master Page Controller ---
-const MasterContent = ({ currentPath, currentSubPath, navigateTo }) => {
-  switch (currentPath) {
-    case 'home': return <HomePage navigateTo={navigateTo} />;
-    case 'herstory': return <HerstoryPage />;
-    case 'programmes': return <ProgrammesPage currentSubPath={currentSubPath} />;
-    case 'iwsl': return <IWSLPage />;
-    case 'network': return <NetworkPage />;
-    case 'advocacy': return <AdvocacyActivismPage />;
-    case 'publications': return <PublicationsPage />;
-    case 'theatre': return <TheatreCreativityPage />;
-    case 'library': return <LibraryArchivePage />;
-    default: return <HomePage navigateTo={navigateTo} />;
-  }
 };
 
 // --- Nav Item with Dropdown Logic ---
