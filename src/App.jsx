@@ -19,7 +19,7 @@ const HERO_SLIDES = [
     title: "The ASR Legacy",
     italic: "Resistance",
     subtitle: "Digitalizing four decades of feminist research and political education in South Asia.",
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=2000",
+    image: "src/assets/BANNERS/Banner---Holistic-Methodology.gif",
     tag: "EST. 1983 — LAHORE",
     cta: "Explore Archive"
   },
@@ -28,7 +28,7 @@ const HERO_SLIDES = [
     title: "Political Education",
     italic: "Empowerment",
     subtitle: "Documentation of the Institute of Women's Studies Lahore and its regional impact.",
-    image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=2000",
+    image: "src/assets/BANNERS/Banner---Library.gif",
     tag: "IWSL LEGACY",
     cta: "View Programmes"
   },
@@ -37,7 +37,7 @@ const HERO_SLIDES = [
     title: "Visualizing Struggle",
     italic: "History",
     subtitle: "A vast repository of posters, films, and theatre records from the frontlines of activism.",
-    image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2000",
+    image: "src/assets/BANNERS/Banner---Activism.gif",
     tag: "CURATED COLLECTIONS",
     cta: "Browse Media"
   }
@@ -89,7 +89,7 @@ const ARCHIVAL_ITEMS = [
     title: "WAF Charter 1981",
     type: "Document",
     category: "Politics",
-    image: "https://images.unsplash.com/photo-1585776245991-cf89dd7fc53a?auto=format&fit=crop&q=80&w=800",
+    image: "src/assets/photos/Peace/img036.jpg",
     year: "1981"
   },
   {
@@ -97,7 +97,7 @@ const ARCHIVAL_ITEMS = [
     title: "Aurat Raj Poster",
     type: "Visual",
     category: "Art",
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800",
+    image: "src/assets/photos/Peace/img044.jpg",
     year: "1990"
   },
   {
@@ -105,7 +105,7 @@ const ARCHIVAL_ITEMS = [
     title: "Regional Dialogue",
     type: "Audio",
     category: "History",
-    image: "https://images.unsplash.com/photo-1478737270239-2fccd2cdee0b?auto=format&fit=crop&q=80&w=800",
+    image: "src/assets/photos/International/img002.jpg",
     year: "1988"
   },
   {
@@ -113,7 +113,7 @@ const ARCHIVAL_ITEMS = [
     title: "Feminist Pedagogy",
     type: "Publication",
     category: "Education",
-    image: "https://images.unsplash.com/photo-1544640808-32ca72ac7f37?auto=format&fit=crop&q=80&w=800",
+    image: "src/assets/photos/Activist District/img006.jpg",
     year: "1995"
   }
 ];
@@ -182,7 +182,7 @@ const MasterContent = ({ currentPath, currentSubPath, navigateTo }) => {
 
 const HerstoryPage = () => (
   <div className="bg-white">
-    <SubpageHeader title="ASR" italic="Herstory" tag="Founded 1983" image="https://images.unsplash.com/photo-1544640808-32ca72ac7f37?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="ASR" italic="Herstory" tag="Founded 1983" image="src/assets/BANNERS/Banner---Activism.gif" />
     <section className="py-24 container mx-auto px-6">
       <div className="max-w-4xl mx-auto space-y-12">
         <p className="text-2xl font-light leading-relaxed text-stone-800">
@@ -210,7 +210,7 @@ const ProgrammesPage = ({ currentSubPath }) => (
       title={currentSubPath || "Our"} 
       italic={currentSubPath ? "" : "Programmes"} 
       tag="Engagement & Impact" 
-      image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2000" 
+      image="src/assets/BANNERS/Banner---Programmes.gif" 
     />
     <section className="py-24 container mx-auto px-6">
       {currentSubPath ? (
@@ -242,7 +242,7 @@ const ProgrammesPage = ({ currentSubPath }) => (
 
 const IWSLPage = () => (
   <div className="bg-white">
-    <SubpageHeader title="Institute of" italic="Women's Studies" tag="Lahore" image="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="Institute of" italic="Women's Studies" tag="Lahore" image="src/assets/BANNERS/Banner---Library.gif" />
     <section className="py-24 container mx-auto px-6">
       <div className="grid lg:grid-cols-2 gap-20 items-center">
         <div>
@@ -273,7 +273,7 @@ const IWSLPage = () => (
 
 const NetworkPage = () => (
   <div className="bg-stone-50">
-    <SubpageHeader title="Network &" italic="Linkages" tag="Regional Solidarity" image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="Network &" italic="Linkages" tag="Regional Solidarity" image="src/assets/BANNERS/Banner---International.gif" />
     <section className="py-24 container mx-auto px-6">
       <SectionHeader title="A Front Without Borders" subtitle="Our strength lies in our regional and international linkages. ASR is part of a global movement for justice." />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -289,7 +289,7 @@ const NetworkPage = () => (
 
 const AdvocacyActivismPage = () => (
   <div className="bg-white">
-    <SubpageHeader title="Advocacy &" italic="Activism" tag="Resistance" image="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="Advocacy &" italic="Activism" tag="Resistance" image="src/assets/BANNERS/Banner---Activism.gif" />
     <section className="py-24 container mx-auto px-6 max-w-5xl">
       <div className="space-y-24">
         {ADVOCACY_MILESTONES.map((item, i) => (
@@ -310,7 +310,7 @@ const AdvocacyActivismPage = () => (
 
 const PublicationsPage = () => (
   <div className="bg-stone-50">
-    <SubpageHeader title="ASR" italic="Publications" tag="Feminist Press" image="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="ASR" italic="Publications" tag="Feminist Press" image="src/assets/BANNERS/Banner---Publications.gif" />
     <section className="py-24 container mx-auto px-6">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
         {[
@@ -339,7 +339,7 @@ const PublicationsPage = () => (
 
 const TheatreCreativityPage = () => (
   <div className="bg-white">
-    <SubpageHeader title="Theatre &" italic="Creativity" tag="Culture" image="https://images.unsplash.com/photo-1514525253361-bee8d4a97475?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="Theatre &" italic="Creativity" tag="Culture" image="src/assets/BANNERS/Banner---Networks-Collaboration.gif" />
     <section className="py-24 container mx-auto px-6 text-center max-w-4xl">
       <h2 className="text-4xl font-light mb-12">Art is not a mirror to reflect reality, but a <span className="font-serif italic text-purple-900">hammer with which to shape it</span>.</h2>
       <p className="text-stone-600 font-light text-xl leading-relaxed mb-20">
@@ -363,7 +363,7 @@ const TheatreCreativityPage = () => (
 
 const LibraryArchivePage = () => (
   <div className="bg-stone-50">
-    <SubpageHeader title="Library &" italic="Archives" tag="The Living Record" image="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=2000" />
+    <SubpageHeader title="Library &" italic="Archives" tag="The Living Record" image="src/assets/BANNERS/Banner---Library.gif" />
     <section className="py-24 container mx-auto px-6">
       <div className="flex flex-col lg:flex-row gap-20">
         <div className="lg:w-1/3">
@@ -570,7 +570,7 @@ const HomePage = ({ navigateTo }) => {
             <div className="lg:col-span-7 relative group cursor-pointer">
               <div className="aspect-[16/10] rounded-[2.5rem] overflow-hidden relative shadow-2xl ring-1 ring-purple-100 bg-purple-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200" 
+                  src="src\assets\photos\International\img005.jpg" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
                   alt="Women Organising and Advocating" 
                 />
@@ -685,7 +685,7 @@ const HomePage = ({ navigateTo }) => {
             </div>
             <div className="order-1 lg:order-2 relative">
               <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-white/10">
-                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover grayscale" alt="IWSL Classroom" />
+                <img src="src\assets\photos\iwsl\img092.jpg" className="w-full h-full object-cover grayscale" alt="IWSL Classroom" />
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-950 via-transparent to-transparent opacity-80"></div>
               </div>
               <div className="absolute -bottom-10 -left-10 p-12 bg-purple-800 rounded-[2rem] hidden md:block shadow-2xl">
