@@ -12,6 +12,15 @@ import {
   ChevronDown, Zap
 } from 'lucide-react';
 
+import heroImage1 from "../src/assets/BANNERS/Banner---Holistic-Methodology.gif";
+import heroImage2 from "../src/assets/BANNERS/Banner---Library.gif";
+import heroImage3 from "../src/assets/BANNERS/Banner---Activism.gif";
+
+import archivalImage1 from "../src/assets/photos/Peace/img036.jpg"
+import archivalImage2 from "../src/assets/photos/Peace/img044.jpg"
+import archivalImage3 from "../src/assets/photos/International/img002.jpg"
+import archivalImage4 from "../src/assets/photos/Activist District/img006.jpg"
+
 // --- Data Constants ---
 const HERO_SLIDES = [
   {
@@ -19,7 +28,7 @@ const HERO_SLIDES = [
     title: "The ASR Legacy",
     italic: "Resistance",
     subtitle: "Digitalizing four decades of feminist research and political education in South Asia.",
-    image: "src/assets/BANNERS/Banner---Holistic-Methodology.gif",
+    image: heroImage1,
     tag: "EST. 1983 — LAHORE",
     cta: "Explore Archive"
   },
@@ -28,7 +37,7 @@ const HERO_SLIDES = [
     title: "Political Education",
     italic: "Empowerment",
     subtitle: "Documentation of the Institute of Women's Studies Lahore and its regional impact.",
-    image: "src/assets/BANNERS/Banner---Library.gif",
+    image: heroImage2,
     tag: "IWSL LEGACY",
     cta: "View Programmes"
   },
@@ -37,7 +46,7 @@ const HERO_SLIDES = [
     title: "Visualizing Struggle",
     italic: "History",
     subtitle: "A vast repository of posters, films, and theatre records from the frontlines of activism.",
-    image: "src/assets/BANNERS/Banner---Activism.gif",
+    image: heroImage3,
     tag: "CURATED COLLECTIONS",
     cta: "Browse Media"
   }
@@ -89,7 +98,7 @@ const ARCHIVAL_ITEMS = [
     title: "WAF Charter 1981",
     type: "Document",
     category: "Politics",
-    image: "src/assets/photos/Peace/img036.jpg",
+    image: archivalImage1,
     year: "1981"
   },
   {
@@ -97,7 +106,7 @@ const ARCHIVAL_ITEMS = [
     title: "Aurat Raj Poster",
     type: "Visual",
     category: "Art",
-    image: "src/assets/photos/Peace/img044.jpg",
+    image: archivalImage2,
     year: "1990"
   },
   {
@@ -105,7 +114,7 @@ const ARCHIVAL_ITEMS = [
     title: "Regional Dialogue",
     type: "Audio",
     category: "History",
-    image: "src/assets/photos/International/img002.jpg",
+    image: archivalImage3,
     year: "1988"
   },
   {
@@ -113,7 +122,7 @@ const ARCHIVAL_ITEMS = [
     title: "Feminist Pedagogy",
     type: "Publication",
     category: "Education",
-    image: "src/assets/photos/Activist District/img006.jpg",
+    image: archivalImage4,
     year: "1995"
   }
 ];
