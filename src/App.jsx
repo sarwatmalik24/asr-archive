@@ -21,6 +21,8 @@ import archivalImage2 from "../src/assets/photos/Peace/img044.jpg"
 import archivalImage3 from "../src/assets/photos/International/img002.jpg"
 import archivalImage4 from "../src/assets/photos/Activist District/img006.jpg"
 
+import advocacyImage from "../src/assets/photos/International/img005.jpg"
+
 // --- Data Constants ---
 const HERO_SLIDES = [
   {
@@ -579,7 +581,7 @@ const HomePage = ({ navigateTo }) => {
             <div className="lg:col-span-7 relative group cursor-pointer">
               <div className="aspect-[16/10] rounded-[2.5rem] overflow-hidden relative shadow-2xl ring-1 ring-purple-100 bg-purple-100">
                 <img 
-                  src="src\assets\photos\International\img005.jpg" 
+                  src={advocacyImage}
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
                   alt="Women Organising and Advocating" 
                 />
